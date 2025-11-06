@@ -467,22 +467,41 @@ class EnglishLearningApp {
                 console.log('文件输入事件绑定完成');
             }
         
-            // 播放控制
+            // 播放控制（移动端添加触摸事件支持）
             if (this.playBtn) {
-                this.playBtn.addEventListener('click', () => this.playText());
-                console.log('播放按钮事件绑定完成');
+                // 同时绑定click和touchend事件，确保移动端可用
+                const playHandler = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.playText();
+                };
+                this.playBtn.addEventListener('click', playHandler);
+                this.playBtn.addEventListener('touchend', playHandler);
+                console.log('播放按钮事件绑定完成（支持触摸）');
             } else {
                 console.error('playBtn元素未找到');
             }
             
             if (this.pauseBtn) {
-                this.pauseBtn.addEventListener('click', () => this.pauseText());
-                console.log('暂停按钮事件绑定完成');
+                const pauseHandler = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.pauseText();
+                };
+                this.pauseBtn.addEventListener('click', pauseHandler);
+                this.pauseBtn.addEventListener('touchend', pauseHandler);
+                console.log('暂停按钮事件绑定完成（支持触摸）');
             }
             
             if (this.stopBtn) {
-                this.stopBtn.addEventListener('click', () => this.stopText());
-                console.log('停止按钮事件绑定完成');
+                const stopHandler = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.stopText();
+                };
+                this.stopBtn.addEventListener('click', stopHandler);
+                this.stopBtn.addEventListener('touchend', stopHandler);
+                console.log('停止按钮事件绑定完成（支持触摸）');
             }
         
             // 语速和音量控制
@@ -500,28 +519,52 @@ class EnglishLearningApp {
                 console.log('音量控制事件绑定完成');
             }
         
-            // 录音控制
+            // 录音控制（移动端添加触摸事件支持）
             if (this.recordBtn) {
-                this.recordBtn.addEventListener('click', () => this.startRecording());
-                console.log('录音按钮事件绑定完成');
+                const recordHandler = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.startRecording();
+                };
+                this.recordBtn.addEventListener('click', recordHandler);
+                this.recordBtn.addEventListener('touchend', recordHandler);
+                console.log('录音按钮事件绑定完成（支持触摸）');
             } else {
                 console.error('recordBtn元素未找到');
             }
             
             if (this.stopRecordBtn) {
-                this.stopRecordBtn.addEventListener('click', () => this.stopRecording());
-                console.log('停止录音按钮事件绑定完成');
+                const stopRecordHandler = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.stopRecording();
+                };
+                this.stopRecordBtn.addEventListener('click', stopRecordHandler);
+                this.stopRecordBtn.addEventListener('touchend', stopRecordHandler);
+                console.log('停止录音按钮事件绑定完成（支持触摸）');
             }
             
             if (this.playRecordBtn) {
-                this.playRecordBtn.addEventListener('click', () => this.playRecording());
-                console.log('回放录音按钮事件绑定完成');
+                const playRecordHandler = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.playRecording();
+                };
+                this.playRecordBtn.addEventListener('click', playRecordHandler);
+                this.playRecordBtn.addEventListener('touchend', playRecordHandler);
+                console.log('回放录音按钮事件绑定完成（支持触摸）');
             }
         
-            // 分析按钮
+            // 分析按钮（移动端添加触摸事件支持）
             if (this.analyzeBtn) {
-                this.analyzeBtn.addEventListener('click', () => this.analyzePronunciation());
-                console.log('分析按钮事件绑定完成');
+                const analyzeHandler = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.analyzePronunciation();
+                };
+                this.analyzeBtn.addEventListener('click', analyzeHandler);
+                this.analyzeBtn.addEventListener('touchend', analyzeHandler);
+                console.log('分析按钮事件绑定完成（支持触摸）');
             }
             
             // 手动输入分析按钮
