@@ -191,13 +191,12 @@ class EnglishLearningApp {
         this.charCount = document.getElementById('charCount');
         this.clearBtn = document.getElementById('clearBtn');
         this.pasteBtn = document.getElementById('pasteBtn');
-        this.pinTextBtn = document.getElementById('pinTextBtn');
-        this.pinTextLabel = document.getElementById('pinTextLabel');
         this.fileInput = document.getElementById('fileInput');
         this.fileInputLabel = document.getElementById('fileInputLabel');
-        this.pinnedTextDisplay = document.getElementById('pinnedTextDisplay');
-        this.pinnedTextContent = document.getElementById('pinnedTextContent');
-        this.unpinTextBtn = document.getElementById('unpinTextBtn');
+        this.showTextBtn = document.getElementById('showTextBtn');
+        this.showTextLabel = document.getElementById('showTextLabel');
+        this.recordingTextDisplay = document.getElementById('recordingTextDisplay');
+        this.recordingTextContent = document.getElementById('recordingTextContent');
         
         this.playBtn = document.getElementById('playBtn');
         this.pauseBtn = document.getElementById('pauseBtn');
@@ -252,7 +251,7 @@ class EnglishLearningApp {
         this.dataArray = null;
         this.currentAudio = null; // 当前播放的音频对象
         this.currentRecordingId = null; // 当前录音的ID
-        this.isTextPinned = false; // 文本是否固定
+        this.isTextShown = false; // 录音区域文本是否显示
         
         // 初始化存储
         this.audioStorage = new AudioStorage();
@@ -503,10 +502,6 @@ class EnglishLearningApp {
                         reader.onload = (event) => {
                             this.textInput.value = event.target.result;
                             this.updateCharCount();
-                            // 如果文本已固定，更新固定显示
-                            if (this.isTextPinned) {
-                                this.updatePinnedText();
-                            }
                         };
                         reader.readAsText(file);
                     }
@@ -514,35 +509,23 @@ class EnglishLearningApp {
                 console.log('文件输入事件绑定完成');
             }
             
-            // 固定文本按钮
-            if (this.pinTextBtn) {
-                const pinHandler = (e) => {
+            // 显示文本按钮（录音区域）
+            if (this.showTextBtn) {
+                const showTextHandler = (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    this.togglePinText();
+                    this.toggleRecordingText();
                 };
-                this.pinTextBtn.addEventListener('click', pinHandler);
-                this.pinTextBtn.addEventListener('touchend', pinHandler);
-                console.log('固定文本按钮事件绑定完成');
+                this.showTextBtn.addEventListener('click', showTextHandler);
+                this.showTextBtn.addEventListener('touchend', showTextHandler);
+                console.log('显示文本按钮事件绑定完成');
             }
             
-            // 取消固定按钮
-            if (this.unpinTextBtn) {
-                const unpinHandler = (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    this.togglePinText();
-                };
-                this.unpinTextBtn.addEventListener('click', unpinHandler);
-                this.unpinTextBtn.addEventListener('touchend', unpinHandler);
-                console.log('取消固定按钮事件绑定完成');
-            }
-            
-            // 文本输入时更新固定显示
+            // 文本输入时更新显示
             if (this.textInput) {
                 this.textInput.addEventListener('input', () => {
-                    if (this.isTextPinned) {
-                        this.updatePinnedText();
+                    if (this.isTextShown) {
+                        this.updateRecordingText();
                     }
                 });
             }
@@ -604,9 +587,9 @@ class EnglishLearningApp {
                 const recordHandler = (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    // 录音时自动固定文本（如果未固定且是移动端）
-                    if (!this.isTextPinned && this.isMobile && this.textInput && this.textInput.value.trim()) {
-                        this.pinText();
+                    // 录音时自动显示文本（如果未显示且是移动端）
+                    if (!this.isTextShown && this.isMobile && this.textInput && this.textInput.value.trim()) {
+                        this.showRecordingText();
                     }
                     this.startRecording();
                 };
@@ -971,15 +954,6 @@ class EnglishLearningApp {
             } else {
                 this.analyzeBtn.disabled = false;
             }
-            
-            // 录音结束后，可以选择取消固定（不自动取消，让用户决定）
-            // 如果需要自动取消，可以取消下面的注释
-            // if (this.isTextPinned && this.isMobile) {
-            //     // 延迟取消，让用户有时间查看结果
-            //     setTimeout(() => {
-            //         // this.unpinText();
-            //     }, 2000);
-            // }
         }
     }
     
@@ -1442,85 +1416,69 @@ class EnglishLearningApp {
         }
     }
     
-    // 文本固定功能
-    togglePinText() {
-        if (this.isTextPinned) {
-            this.unpinText();
+    // 录音区域文本显示功能
+    toggleRecordingText() {
+        if (this.isTextShown) {
+            this.hideRecordingText();
         } else {
-            this.pinText();
+            this.showRecordingText();
         }
     }
     
-    pinText() {
+    showRecordingText() {
         if (!this.textInput || !this.textInput.value.trim()) {
             alert('请先输入文本');
             return;
         }
         
-        this.isTextPinned = true;
+        this.isTextShown = true;
         
         // 更新按钮状态
-        if (this.pinTextBtn) {
-            this.pinTextBtn.classList.add('active');
-            if (this.pinTextLabel) {
-                this.pinTextLabel.textContent = '已固定';
+        if (this.showTextBtn) {
+            this.showTextBtn.classList.add('active');
+            if (this.showTextLabel) {
+                this.showTextLabel.textContent = '隐藏文本';
             }
         }
         
-        // 更新固定显示区域
-        this.updatePinnedText();
-        
-        // 显示固定显示区域（移动端）
-        if (this.isMobile && this.pinnedTextDisplay) {
-            this.pinnedTextDisplay.style.display = 'flex';
-            document.body.classList.add('has-pinned-text');
+        // 显示文本区域
+        if (this.recordingTextDisplay) {
+            this.recordingTextDisplay.style.display = 'block';
         }
         
-        // 桌面端：固定文本区域
-        if (!this.isMobile && this.textInputSection) {
-            this.textInputSection.classList.add('pinned');
-        }
+        // 更新文本内容
+        this.updateRecordingText();
         
-        console.log('文本已固定');
+        console.log('录音区域文本已显示');
     }
     
-    unpinText() {
-        this.isTextPinned = false;
+    hideRecordingText() {
+        this.isTextShown = false;
         
         // 更新按钮状态
-        if (this.pinTextBtn) {
-            this.pinTextBtn.classList.remove('active');
-            if (this.pinTextLabel) {
-                this.pinTextLabel.textContent = '固定';
+        if (this.showTextBtn) {
+            this.showTextBtn.classList.remove('active');
+            if (this.showTextLabel) {
+                this.showTextLabel.textContent = '显示文本';
             }
         }
         
-        // 隐藏固定显示区域（移动端）
-        if (this.pinnedTextDisplay) {
-            this.pinnedTextDisplay.style.display = 'none';
-            document.body.classList.remove('has-pinned-text');
+        // 隐藏文本区域
+        if (this.recordingTextDisplay) {
+            this.recordingTextDisplay.style.display = 'none';
         }
         
-        // 桌面端：取消固定
-        if (this.textInputSection) {
-            this.textInputSection.classList.remove('pinned');
-        }
-        
-        console.log('文本已取消固定');
+        console.log('录音区域文本已隐藏');
     }
     
-    updatePinnedText() {
-        if (this.pinnedTextContent && this.textInput) {
+    updateRecordingText() {
+        if (this.recordingTextContent && this.textInput) {
             const text = this.textInput.value.trim();
             if (text) {
-                // 限制显示长度，避免太长
-                const maxLength = 200;
-                const displayText = text.length > maxLength ? 
-                    text.substring(0, maxLength) + '...' : 
-                    text;
-                this.pinnedTextContent.textContent = displayText;
+                // 显示完整文本，不截断
+                this.recordingTextContent.textContent = text;
             } else {
-                this.pinnedTextContent.textContent = '暂无文本';
+                this.recordingTextContent.textContent = '暂无文本';
             }
         }
     }
