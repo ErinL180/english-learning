@@ -225,8 +225,11 @@ class EnglishLearningApp {
         // 初始化存储
         this.audioStorage = new AudioStorage();
         
-        // 初始化
-        this.init();
+        // 初始化（异步，不阻塞）
+        this.init().catch(error => {
+            console.error('应用初始化失败:', error);
+            alert('应用初始化失败，请刷新页面重试');
+        });
     }
     
     async init() {
@@ -236,17 +239,18 @@ class EnglishLearningApp {
         // 更新浏览器提示
         this.updateBrowserTip();
         
-        // 初始化IndexedDB
-        try {
-            await this.audioStorage.init();
+        // 初始化IndexedDB（不阻塞其他功能）
+        this.audioStorage.init().then(() => {
             console.log('IndexedDB初始化成功');
-        } catch (error) {
+            // 尝试加载最新的录音
+            this.loadLatestRecording().catch(err => {
+                console.error('加载最新录音失败:', err);
+            });
+        }).catch(error => {
             console.error('IndexedDB初始化失败:', error);
-            alert('存储初始化失败，录音功能可能受限');
-        }
-        
-        // 尝试加载最新的录音
-        await this.loadLatestRecording();
+            // 不显示alert，避免干扰用户，只记录错误
+            console.warn('存储功能可能受限，但其他功能仍可使用');
+        });
         
         // 初始化Web Speech API
         this.initSpeechSynthesis();
