@@ -85,7 +85,7 @@ section:hover {
     font-weight: 600;
 }
 
-/* 文本输入区域 */
+/* æ–‡æœ¬è¾“å…¥åŒºåŸŸ */
 #textInput {
     width: 100%;
     padding: 15px;
@@ -114,7 +114,7 @@ section:hover {
     font-size: 0.9em;
 }
 
-/* 按钮样式 */
+/* æŒ‰é’®æ ·å¼ */
 button, .btn-secondary {
     padding: 10px 20px;
     border: none;
@@ -126,6 +126,14 @@ button, .btn-secondary {
     display: inline-flex;
     align-items: center;
     gap: 5px;
+    /* ç§»åŠ¨ç«¯è§¦æ‘¸ä¼˜åŒ– */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(74, 144, 226, 0.3);
+    user-select: none;
+    -webkit-user-select: none;
+    pointer-events: auto;
+    position: relative;
+    z-index: 1;
 }
 
 .btn-primary {
@@ -175,7 +183,7 @@ button, .btn-secondary {
     font-size: 1.2em;
 }
 
-/* 播放控制 */
+/* æ’­æ”¾æŽ§åˆ¶ */
 .play-controls {
     display: flex;
     gap: 10px;
@@ -253,7 +261,7 @@ button, .btn-secondary {
     font-weight: 600;
 }
 
-/* 录音区域 */
+/* å½•éŸ³åŒºåŸŸ */
 .record-controls {
     display: flex;
     gap: 10px;
@@ -316,7 +324,7 @@ button, .btn-secondary {
     transition: width 0.1s ease;
 }
 
-/* 结果区域 */
+/* ç»“æžœåŒºåŸŸ */
 .result-content {
     min-height: 100px;
     padding: 15px;
@@ -402,7 +410,7 @@ button, .btn-secondary {
     border-radius: 3px;
 }
 
-/* 历史记录 */
+/* åŽ†å²è®°å½• */
 .history-list {
     max-height: 300px;
     overflow-y: auto;
@@ -457,7 +465,7 @@ footer {
     font-size: 0.9em;
 }
 
-/* 移动端优化 */
+/* ç§»åŠ¨ç«¯ä¼˜åŒ– */
 @media (max-width: 768px) {
     body {
         padding: 10px;
@@ -501,7 +509,7 @@ footer {
     }
     
     #textInput {
-        font-size: 16px; /* 防止iOS自动缩放 */
+        font-size: 16px; /* é˜²æ­¢iOSè‡ªåŠ¨ç¼©æ”¾ */
         padding: 12px;
     }
     
@@ -515,9 +523,17 @@ footer {
         width: 100%;
         justify-content: center;
         padding: 14px 20px;
-        font-size: 16px; /* 更大的触摸目标 */
-        min-height: 48px; /* 符合移动端触摸标准 */
+        font-size: 16px; /* æ›´å¤§çš„è§¦æ‘¸ç›®æ ‡ */
+        min-height: 48px; /* ç¬¦åˆç§»åŠ¨ç«¯è§¦æ‘¸æ ‡å‡† */
         -webkit-tap-highlight-color: rgba(74, 144, 226, 0.3);
+        touch-action: manipulation;
+        user-select: none;
+        -webkit-user-select: none;
+        pointer-events: auto !important;
+        position: relative;
+        z-index: 10;
+        /* ç¡®ä¿æŒ‰é’®å¯ç‚¹å‡» */
+        -webkit-touch-callout: none;
     }
     
     .settings-controls {
@@ -562,7 +578,7 @@ footer {
     }
 }
 
-/* 小屏幕手机优化 */
+/* å°å±å¹•æ‰‹æœºä¼˜åŒ– */
 @media (max-width: 480px) {
     header h1 {
         font-size: 1.5em;
@@ -586,7 +602,7 @@ footer {
     }
 }
 
-/* 滚动条样式 */
+/* æ»šåŠ¨æ¡æ ·å¼ */
 .history-list::-webkit-scrollbar {
     width: 8px;
 }
@@ -604,4 +620,3 @@ footer {
 .history-list::-webkit-scrollbar-thumb:hover {
     background: #357abd;
 }
-
