@@ -161,6 +161,26 @@ class AudioStorage {
             };
         });
     }
+    
+    async getRecordingById(id) {
+        if (!this.db) {
+            await this.init();
+        }
+        
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction([this.storeName], 'readonly');
+            const store = transaction.objectStore(this.storeName);
+            const request = store.get(id);
+            
+            request.onsuccess = () => {
+                resolve(request.result);
+            };
+            
+            request.onerror = () => {
+                reject(request.error);
+            };
+        });
+    }
 }
 
 class EnglishLearningApp {
@@ -194,6 +214,11 @@ class EnglishLearningApp {
         
         this.historyList = document.getElementById('historyList');
         this.clearHistoryBtn = document.getElementById('clearHistoryBtn');
+        this.textHistoryTab = document.getElementById('textHistoryTab');
+        this.audioHistoryTab = document.getElementById('audioHistoryTab');
+        this.textHistoryPanel = document.getElementById('textHistoryPanel');
+        this.audioHistoryPanel = document.getElementById('audioHistoryPanel');
+        this.audioHistoryList = document.getElementById('audioHistoryList');
         this.browserTip = document.getElementById('browserTip');
         this.manualInputSection = document.getElementById('manualInputSection');
         this.manualRecognizedText = document.getElementById('manualRecognizedText');
@@ -261,9 +286,20 @@ class EnglishLearningApp {
             this.bindEvents();
             console.log('事件绑定完成');
             
+            // 绑定录音历史事件（使用事件委托，只需绑定一次）
+            this.bindAudioHistoryEvents();
+            console.log('录音历史事件绑定完成');
+            
             // 加载历史记录
             this.loadHistory();
             console.log('历史记录加载完成');
+            
+            // 加载录音历史（延迟加载，避免阻塞）
+            setTimeout(() => {
+                this.loadAudioHistory().catch(err => {
+                    console.error('加载录音历史失败:', err);
+                });
+            }, 500);
             
             // 更新字符计数
             this.updateCharCount();
@@ -581,6 +617,29 @@ class EnglishLearningApp {
                 console.log('手动输入分析按钮事件绑定完成');
             }
         
+            // 历史记录标签切换
+            if (this.textHistoryTab) {
+                const textTabHandler = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.switchHistoryTab('text');
+                };
+                this.textHistoryTab.addEventListener('click', textTabHandler);
+                this.textHistoryTab.addEventListener('touchend', textTabHandler);
+                console.log('文本历史标签事件绑定完成');
+            }
+            
+            if (this.audioHistoryTab) {
+                const audioTabHandler = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.switchHistoryTab('audio');
+                };
+                this.audioHistoryTab.addEventListener('click', audioTabHandler);
+                this.audioHistoryTab.addEventListener('touchend', audioTabHandler);
+                console.log('录音历史标签事件绑定完成');
+            }
+            
             // 历史记录
             if (this.clearHistoryBtn) {
                 this.clearHistoryBtn.addEventListener('click', () => this.clearHistory());
@@ -1323,6 +1382,247 @@ class EnglishLearningApp {
         if (confirm('确定要清空所有历史记录吗？')) {
             localStorage.removeItem('englishLearningHistory');
             this.loadHistory();
+        }
+    }
+    
+    // 录音历史功能
+    switchHistoryTab(tab) {
+        if (tab === 'text') {
+            this.textHistoryTab.classList.add('active');
+            this.audioHistoryTab.classList.remove('active');
+            this.textHistoryPanel.classList.add('active');
+            this.audioHistoryPanel.classList.remove('active');
+        } else if (tab === 'audio') {
+            this.audioHistoryTab.classList.add('active');
+            this.textHistoryTab.classList.remove('active');
+            this.audioHistoryPanel.classList.add('active');
+            this.textHistoryPanel.classList.remove('active');
+            // 切换到录音历史时刷新列表
+            this.loadAudioHistory();
+        }
+    }
+    
+    async loadAudioHistory() {
+        try {
+            const recordings = await this.audioStorage.getAllRecordings();
+            
+            if (!recordings || recordings.length === 0) {
+                this.audioHistoryList.innerHTML = '<p class="placeholder">暂无录音记录</p>';
+                return;
+            }
+            
+            this.audioHistoryList.innerHTML = recordings.map(recording => {
+                const date = new Date(recording.timestamp);
+                const dateStr = date.toLocaleString('zh-CN', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                const duration = recording.duration || 0;
+                const minutes = Math.floor(duration / 60);
+                const seconds = duration % 60;
+                const durationStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                
+                const textPreview = recording.text ? 
+                    (recording.text.length > 50 ? recording.text.substring(0, 50) + '...' : recording.text) : 
+                    '无文本';
+                
+                return `
+                    <div class="audio-history-item" data-id="${recording.id}">
+                        <div class="audio-history-item-header">
+                            <span class="audio-history-item-date">${dateStr}</span>
+                            <span class="audio-history-item-duration">⏱️ ${durationStr}</span>
+                        </div>
+                        <div class="audio-history-item-text">${this.escapeHtml(textPreview)}</div>
+                        <div class="audio-history-item-actions">
+                            <button class="btn-play-audio" data-id="${recording.id}" data-action="play">
+                                <span class="icon">▶️</span> 回放
+                            </button>
+                            <button class="btn-analyze-audio" data-id="${recording.id}" data-action="analyze">
+                                <span class="icon">🔍</span> 分析
+                            </button>
+                            <button class="btn-delete-audio" data-id="${recording.id}" data-action="delete">
+                                <span class="icon">🗑️</span> 删除
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            // 不需要重新绑定事件，因为已经在init中绑定了（使用事件委托）
+            
+            console.log(`加载了 ${recordings.length} 条录音记录`);
+        } catch (error) {
+            console.error('加载录音历史失败:', error);
+            this.audioHistoryList.innerHTML = '<p class="placeholder" style="color: var(--error-color);">加载录音历史失败</p>';
+        }
+    }
+    
+    bindAudioHistoryEvents() {
+        // 使用事件委托，避免每次重新绑定
+        if (this.audioHistoryList) {
+            this.audioHistoryList.addEventListener('click', (e) => {
+                const button = e.target.closest('button[data-action]');
+                if (button) {
+                    const id = parseInt(button.getAttribute('data-id'));
+                    const action = button.getAttribute('data-action');
+                    
+                    if (action === 'play') {
+                        this.playHistoryRecording(id);
+                    } else if (action === 'analyze') {
+                        this.analyzeHistoryRecording(id);
+                    } else if (action === 'delete') {
+                        this.deleteRecording(id);
+                    }
+                }
+            });
+            
+            // 移动端触摸支持
+            this.audioHistoryList.addEventListener('touchend', (e) => {
+                const button = e.target.closest('button[data-action]');
+                if (button) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const id = parseInt(button.getAttribute('data-id'));
+                    const action = button.getAttribute('data-action');
+                    
+                    if (action === 'play') {
+                        this.playHistoryRecording(id);
+                    } else if (action === 'analyze') {
+                        this.analyzeHistoryRecording(id);
+                    } else if (action === 'delete') {
+                        this.deleteRecording(id);
+                    }
+                }
+            });
+        }
+    }
+    
+    async playHistoryRecording(id) {
+        try {
+            const recordings = await this.audioStorage.getAllRecordings();
+            const recording = recordings.find(r => r.id === id);
+            
+            if (!recording) {
+                alert('录音不存在');
+                return;
+            }
+            
+            // 释放旧的URL
+            if (this.recordedAudio) {
+                URL.revokeObjectURL(this.recordedAudio);
+            }
+            
+            // 创建新的URL
+            this.recordedAudio = URL.createObjectURL(recording.audioBlob);
+            this.recordedText = recording.recognizedText || '';
+            this.currentRecordingId = recording.id;
+            
+            // 播放录音
+            this.playRecording();
+            
+            console.log('播放历史录音，ID:', id);
+        } catch (error) {
+            console.error('播放历史录音失败:', error);
+            alert('播放失败：' + error.message);
+        }
+    }
+    
+    async analyzeHistoryRecording(id) {
+        try {
+            const recordings = await this.audioStorage.getAllRecordings();
+            const recording = recordings.find(r => r.id === id);
+            
+            if (!recording) {
+                alert('录音不存在');
+                return;
+            }
+            
+            // 加载录音到当前状态
+            if (this.recordedAudio) {
+                URL.revokeObjectURL(this.recordedAudio);
+            }
+            
+            this.recordedAudio = URL.createObjectURL(recording.audioBlob);
+            this.recordedText = recording.recognizedText || '';
+            this.currentRecordingId = recording.id;
+            
+            // 加载文本到输入框
+            if (recording.text) {
+                this.textInput.value = recording.text;
+                this.updateCharCount();
+            }
+            
+            // 执行分析
+            if (this.recordedText) {
+                this.analyzePronunciation();
+            } else {
+                // 如果没有识别文本，提示用户
+                if (this.hasSpeechRecognition) {
+                    alert('该录音没有识别文本，请使用手动输入功能');
+                } else {
+                    // 显示手动输入框
+                    if (this.manualInputSection) {
+                        this.manualInputSection.style.display = 'block';
+                        if (this.manualRecognizedText) {
+                            this.manualRecognizedText.focus();
+                        }
+                    }
+                }
+            }
+            
+            // 切换到文本历史标签，显示分析结果
+            this.switchHistoryTab('text');
+            
+            console.log('分析历史录音，ID:', id);
+        } catch (error) {
+            console.error('分析历史录音失败:', error);
+            alert('分析失败：' + error.message);
+        }
+    }
+    
+    async deleteRecording(id) {
+        if (!confirm('确定要删除这条录音吗？')) {
+            return;
+        }
+        
+        try {
+            if (!this.audioStorage.db) {
+                await this.audioStorage.init();
+            }
+            
+            const transaction = this.audioStorage.db.transaction([this.audioStorage.storeName], 'readwrite');
+            const store = transaction.objectStore(this.audioStorage.storeName);
+            
+            const request = store.delete(id);
+            
+            request.onsuccess = () => {
+                console.log('删除录音成功，ID:', id);
+                // 如果删除的是当前录音，清空状态
+                if (this.currentRecordingId === id) {
+                    if (this.recordedAudio) {
+                        URL.revokeObjectURL(this.recordedAudio);
+                    }
+                    this.recordedAudio = null;
+                    this.recordedText = '';
+                    this.currentRecordingId = null;
+                    this.playRecordBtn.disabled = true;
+                    this.analyzeBtn.disabled = true;
+                }
+                // 刷新列表
+                this.loadAudioHistory();
+            };
+            
+            request.onerror = () => {
+                console.error('删除录音失败:', request.error);
+                alert('删除失败，请重试');
+            };
+        } catch (error) {
+            console.error('删除录音时出错:', error);
+            alert('删除失败：' + error.message);
         }
     }
 }
