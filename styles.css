@@ -85,7 +85,7 @@ section:hover {
     font-weight: 600;
 }
 
-/* æ–‡æœ¬è¾“å…¥åŒºåŸŸ */
+/* 文本输入区域 */
 #textInput {
     width: 100%;
     padding: 15px;
@@ -103,6 +103,62 @@ section:hover {
     border-color: var(--primary-color);
 }
 
+/* 固定文本显示区域（移动端） */
+.pinned-text-display {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    border-bottom: 2px solid var(--primary-color);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    max-height: 40vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.pinned-text-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background: var(--primary-color);
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.pinned-text-content {
+    padding: 12px 15px;
+    max-height: calc(40vh - 50px);
+    overflow-y: auto;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text-color);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/* 文本区域固定状态 */
+.text-input-section.pinned {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--card-bg);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-bottom: 10px;
+}
+
+/* 当文本固定时，调整body padding */
+body.has-pinned-text {
+    padding-top: 0;
+}
+
+body.has-pinned-text .container {
+    margin-top: 0;
+}
+
 .text-actions {
     display: flex;
     gap: 10px;
@@ -114,7 +170,7 @@ section:hover {
     font-size: 0.9em;
 }
 
-/* æŒ‰é’®æ ·å¼ */
+/* 按钮样式 */
 button, .btn-secondary {
     padding: 10px 20px;
     border: none;
@@ -126,7 +182,7 @@ button, .btn-secondary {
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    /* ç§»åŠ¨ç«¯è§¦æ‘¸ä¼˜åŒ– */
+    /* 移动端触摸优化 */
     touch-action: manipulation;
     -webkit-tap-highlight-color: rgba(74, 144, 226, 0.3);
     user-select: none;
@@ -183,7 +239,7 @@ button, .btn-secondary {
     font-size: 1.2em;
 }
 
-/* æ’­æ”¾æŽ§åˆ¶ */
+/* 播放控制 */
 .play-controls {
     display: flex;
     gap: 10px;
@@ -261,7 +317,7 @@ button, .btn-secondary {
     font-weight: 600;
 }
 
-/* å½•éŸ³åŒºåŸŸ */
+/* 录音区域 */
 .record-controls {
     display: flex;
     gap: 10px;
@@ -324,7 +380,7 @@ button, .btn-secondary {
     transition: width 0.1s ease;
 }
 
-/* ç»“æžœåŒºåŸŸ */
+/* 结果区域 */
 .result-content {
     min-height: 100px;
     padding: 15px;
@@ -410,7 +466,7 @@ button, .btn-secondary {
     border-radius: 3px;
 }
 
-/* åŽ†å²è®°å½• */
+/* 历史记录 */
 .history-tabs {
     display: flex;
     gap: 10px;
@@ -437,6 +493,17 @@ button, .btn-secondary {
     background: var(--primary-color);
     color: white;
     border-color: var(--primary-color);
+}
+
+/* 固定按钮激活状态 */
+#pinTextBtn.active {
+    background: var(--success-color);
+    color: white;
+    border-color: var(--success-color);
+}
+
+#pinTextBtn.active:hover {
+    background: #45a049;
 }
 
 .history-panel {
@@ -497,7 +564,7 @@ button, .btn-secondary {
     margin-top: 8px;
 }
 
-/* å½•éŸ³åŽ†å²é¡¹ */
+/* 录音历史项 */
 .audio-history-item {
     padding: 15px;
     background: #f8f9fa;
@@ -596,7 +663,7 @@ footer {
     font-size: 0.9em;
 }
 
-/* ç§»åŠ¨ç«¯ä¼˜åŒ– */
+/* 移动端优化 */
 @media (max-width: 768px) {
     body {
         padding: 10px;
@@ -640,8 +707,33 @@ footer {
     }
     
     #textInput {
-        font-size: 16px; /* é˜²æ­¢iOSè‡ªåŠ¨ç¼©æ”¾ */
+        font-size: 16px; /* 防止iOS自动缩放 */
         padding: 12px;
+    }
+    
+    /* 移动端固定文本显示 */
+    .pinned-text-display {
+        max-height: 35vh;
+    }
+    
+    .pinned-text-content {
+        font-size: 14px;
+        padding: 10px 12px;
+        max-height: calc(35vh - 45px);
+    }
+    
+    .pinned-text-header {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+    
+    /* 文本区域固定状态（移动端） */
+    .text-input-section.pinned {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: var(--card-bg);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
     
     .play-controls,
@@ -654,8 +746,8 @@ footer {
         width: 100%;
         justify-content: center;
         padding: 14px 20px;
-        font-size: 16px; /* æ›´å¤§çš„è§¦æ‘¸ç›®æ ‡ */
-        min-height: 48px; /* ç¬¦åˆç§»åŠ¨ç«¯è§¦æ‘¸æ ‡å‡† */
+        font-size: 16px; /* 更大的触摸目标 */
+        min-height: 48px; /* 符合移动端触摸标准 */
         -webkit-tap-highlight-color: rgba(74, 144, 226, 0.3);
         touch-action: manipulation;
         user-select: none;
@@ -663,7 +755,7 @@ footer {
         pointer-events: auto !important;
         position: relative;
         z-index: 10;
-        /* ç¡®ä¿æŒ‰é’®å¯ç‚¹å‡» */
+        /* 确保按钮可点击 */
         -webkit-touch-callout: none;
     }
     
@@ -709,7 +801,7 @@ footer {
     }
 }
 
-/* å°å±å¹•æ‰‹æœºä¼˜åŒ– */
+/* 小屏幕手机优化 */
 @media (max-width: 480px) {
     header h1 {
         font-size: 1.5em;
@@ -733,7 +825,7 @@ footer {
     }
 }
 
-/* æ»šåŠ¨æ¡æ ·å¼ */
+/* 滚动条样式 */
 .history-list::-webkit-scrollbar {
     width: 8px;
 }
@@ -751,3 +843,4 @@ footer {
 .history-list::-webkit-scrollbar-thumb:hover {
     background: #357abd;
 }
+
