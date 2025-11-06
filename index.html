@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="format-detection" content="telephone=no">
+    <title>个人英语学习助手</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 个人英语学习助手</h1>
+            <p class="subtitle">AI语音朗读 · 跟读练习 · 发音纠错</p>
+        </header>
+
+        <main>
+            <!-- 文本输入区域 -->
+            <section class="text-input-section">
+                <div class="section-header">
+                    <h2>📝 输入英文文本</h2>
+                    <div class="text-actions">
+                        <button id="clearBtn" class="btn-secondary">清空</button>
+                        <button id="pasteBtn" class="btn-secondary">粘贴</button>
+                        <label for="fileInput" class="btn-secondary" id="fileInputLabel">导入文件</label>
+                        <input type="file" id="fileInput" accept=".txt,.md" style="display: none;">
+                    </div>
+                </div>
+                <textarea 
+                    id="textInput" 
+                    placeholder="粘贴或输入英文文本，支持多行...&#10;&#10;例如：&#10;Hello, how are you today?&#10;I want to learn English and improve my pronunciation."
+                    rows="8"
+                ></textarea>
+                <div class="text-info">
+                    <span id="charCount">0</span> 字符
+                </div>
+            </section>
+
+            <!-- 播放控制区域 -->
+            <section class="control-section">
+                <div class="play-controls">
+                    <button id="playBtn" class="btn-primary">
+                        <span class="icon">🔊</span> 播放朗读
+                    </button>
+                    <button id="pauseBtn" class="btn-primary" disabled>
+                        <span class="icon">⏸️</span> 暂停
+                    </button>
+                    <button id="stopBtn" class="btn-primary" disabled>
+                        <span class="icon">⏹️</span> 停止
+                    </button>
+                </div>
+                
+                <div class="settings-controls">
+                    <label for="rateSlider">语速：</label>
+                    <input type="range" id="rateSlider" min="0.5" max="2" step="0.1" value="1">
+                    <span id="rateValue">1.0x</span>
+                    
+                    <label for="volumeSlider">音量：</label>
+                    <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="1">
+                    <span id="volumeValue">100%</span>
+                </div>
+
+                <div class="current-text" id="currentText">
+                    <p>准备朗读...</p>
+                </div>
+            </section>
+
+            <!-- 录音控制区域 -->
+            <section class="record-section">
+                <div class="section-header">
+                    <h2>🎤 跟读录音</h2>
+                </div>
+                <div class="record-controls">
+                    <button id="recordBtn" class="btn-record">
+                        <span class="icon">🎤</span> 开始录音
+                    </button>
+                    <button id="stopRecordBtn" class="btn-record" disabled>
+                        <span class="icon">⏹️</span> 停止录音
+                    </button>
+                    <button id="playRecordBtn" class="btn-secondary" disabled>
+                        <span class="icon">▶️</span> 回放录音
+                    </button>
+                </div>
+                <div class="record-info">
+                    <div class="recording-indicator" id="recordingIndicator" style="display: none;">
+                        <span class="pulse"></span>
+                        <span>正在录音中...</span>
+                    </div>
+                    <div class="record-time" id="recordTime">00:00</div>
+                    <div class="volume-meter">
+                        <div class="volume-bar" id="volumeBar"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 纠错结果区域 -->
+            <section class="result-section">
+                <div class="section-header">
+                    <h2>✅ 发音纠错结果</h2>
+                    <button id="analyzeBtn" class="btn-primary" disabled>
+                        <span class="icon">🔍</span> 分析发音
+                    </button>
+                </div>
+                <!-- Safari备选方案：手动输入识别文本 -->
+                <div id="manualInputSection" style="display: none; margin-bottom: 15px; padding: 15px; background: #fff3cd; border-radius: 8px; border-left: 4px solid var(--warning-color);">
+                    <p style="margin-bottom: 10px; font-weight: 600; color: var(--text-color);">
+                        📝 提示：您的浏览器不支持自动语音识别
+                    </p>
+                    <p style="margin-bottom: 10px; font-size: 0.9em; color: var(--text-light);">
+                        请手动输入您刚才朗读的内容，以便进行发音对比：
+                    </p>
+                    <textarea 
+                        id="manualRecognizedText" 
+                        placeholder="请输入您刚才朗读的英文内容..."
+                        rows="3"
+                        style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: 6px; font-size: 14px; resize: vertical;"
+                    ></textarea>
+                    <button id="manualAnalyzeBtn" class="btn-primary" style="margin-top: 10px; width: 100%;">
+                        <span class="icon">🔍</span> 使用手动输入进行分析
+                    </button>
+                </div>
+                <div class="result-content" id="resultContent">
+                    <p class="placeholder">录音后点击"分析发音"查看纠错结果</p>
+                </div>
+            </section>
+
+            <!-- 录音历史 -->
+            <section class="history-section">
+                <div class="section-header">
+                    <h2>📚 练习历史</h2>
+                    <button id="clearHistoryBtn" class="btn-secondary">清空历史</button>
+                </div>
+                <div class="history-list" id="historyList">
+                    <p class="placeholder">暂无练习记录</p>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p id="browserTip">💡 提示：使用Chrome或Edge浏览器可获得最佳体验</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
+
