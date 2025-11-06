@@ -233,43 +233,62 @@ class EnglishLearningApp {
     }
     
     async init() {
-        // 检查浏览器支持
-        this.checkBrowserSupport();
-        
-        // 更新浏览器提示
-        this.updateBrowserTip();
-        
-        // 初始化IndexedDB（不阻塞其他功能）
-        this.audioStorage.init().then(() => {
-            console.log('IndexedDB初始化成功');
-            // 尝试加载最新的录音
-            this.loadLatestRecording().catch(err => {
-                console.error('加载最新录音失败:', err);
-            });
-        }).catch(error => {
-            console.error('IndexedDB初始化失败:', error);
-            // 不显示alert，避免干扰用户，只记录错误
-            console.warn('存储功能可能受限，但其他功能仍可使用');
-        });
-        
-        // 初始化Web Speech API
-        this.initSpeechSynthesis();
-        this.initSpeechRecognition();
-        
-        // 显示/隐藏手动输入备选方案
-        this.toggleManualInput();
-        
-        // 优化移动端体验
-        this.optimizeMobileExperience();
-        
-        // 绑定事件
-        this.bindEvents();
-        
-        // 加载历史记录
-        this.loadHistory();
-        
-        // 更新字符计数
-        this.updateCharCount();
+        try {
+            console.log('开始初始化应用...');
+            
+            // 检查浏览器支持
+            this.checkBrowserSupport();
+            console.log('浏览器支持检查完成');
+            
+            // 更新浏览器提示
+            this.updateBrowserTip();
+            console.log('浏览器提示更新完成');
+            
+            // 初始化Web Speech API（优先，不依赖存储）
+            this.initSpeechSynthesis();
+            this.initSpeechRecognition();
+            console.log('Web Speech API初始化完成');
+            
+            // 显示/隐藏手动输入备选方案
+            this.toggleManualInput();
+            console.log('手动输入备选方案设置完成');
+            
+            // 优化移动端体验
+            this.optimizeMobileExperience();
+            console.log('移动端优化完成');
+            
+            // 绑定事件（重要：必须执行）
+            this.bindEvents();
+            console.log('事件绑定完成');
+            
+            // 加载历史记录
+            this.loadHistory();
+            console.log('历史记录加载完成');
+            
+            // 更新字符计数
+            this.updateCharCount();
+            console.log('字符计数更新完成');
+            
+            // 初始化IndexedDB（不阻塞其他功能，异步执行）
+            setTimeout(() => {
+                this.audioStorage.init().then(() => {
+                    console.log('IndexedDB初始化成功');
+                    // 尝试加载最新的录音
+                    this.loadLatestRecording().catch(err => {
+                        console.error('加载最新录音失败:', err);
+                    });
+                }).catch(error => {
+                    console.error('IndexedDB初始化失败:', error);
+                    // 不显示alert，避免干扰用户，只记录错误
+                    console.warn('存储功能可能受限，但其他功能仍可使用');
+                });
+            }, 100); // 延迟100ms，确保其他功能先初始化
+            
+            console.log('应用初始化完成');
+        } catch (error) {
+            console.error('应用初始化过程中出错:', error);
+            alert('应用初始化失败，请刷新页面重试。错误：' + error.message);
+        }
     }
     
     async loadLatestRecording() {
@@ -397,77 +416,139 @@ class EnglishLearningApp {
     }
     
     bindEvents() {
-        // 文本输入相关
-        this.textInput.addEventListener('input', () => {
-            this.updateCharCount();
-            this.resetControls();
-        });
-        
-        this.clearBtn.addEventListener('click', () => {
-            this.textInput.value = '';
-            this.updateCharCount();
-            this.resetControls();
-        });
-        
-        this.pasteBtn.addEventListener('click', async () => {
-            try {
-                const text = await navigator.clipboard.readText();
-                this.textInput.value = text;
-                this.updateCharCount();
-            } catch (err) {
-                alert('无法读取剪贴板，请手动粘贴');
-            }
-        });
-        
-        this.fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    this.textInput.value = event.target.result;
+        try {
+            console.log('开始绑定事件...');
+            
+            // 文本输入相关
+            if (this.textInput) {
+                this.textInput.addEventListener('input', () => {
                     this.updateCharCount();
-                };
-                reader.readAsText(file);
+                    this.resetControls();
+                });
+                console.log('文本输入事件绑定完成');
+            } else {
+                console.error('textInput元素未找到');
             }
-        });
         
-        // 播放控制
-        this.playBtn.addEventListener('click', () => this.playText());
-        this.pauseBtn.addEventListener('click', () => this.pauseText());
-        this.stopBtn.addEventListener('click', () => this.stopText());
+            if (this.clearBtn) {
+                this.clearBtn.addEventListener('click', () => {
+                    this.textInput.value = '';
+                    this.updateCharCount();
+                    this.resetControls();
+                });
+                console.log('清空按钮事件绑定完成');
+            }
+            
+            if (this.pasteBtn) {
+                this.pasteBtn.addEventListener('click', async () => {
+                    try {
+                        const text = await navigator.clipboard.readText();
+                        this.textInput.value = text;
+                        this.updateCharCount();
+                    } catch (err) {
+                        alert('无法读取剪贴板，请手动粘贴');
+                    }
+                });
+                console.log('粘贴按钮事件绑定完成');
+            }
+            
+            if (this.fileInput) {
+                this.fileInput.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            this.textInput.value = event.target.result;
+                            this.updateCharCount();
+                        };
+                        reader.readAsText(file);
+                    }
+                });
+                console.log('文件输入事件绑定完成');
+            }
         
-        // 语速和音量控制
-        this.rateSlider.addEventListener('input', (e) => {
-            this.rateValue.textContent = parseFloat(e.target.value).toFixed(1) + 'x';
-        });
+            // 播放控制
+            if (this.playBtn) {
+                this.playBtn.addEventListener('click', () => this.playText());
+                console.log('播放按钮事件绑定完成');
+            } else {
+                console.error('playBtn元素未找到');
+            }
+            
+            if (this.pauseBtn) {
+                this.pauseBtn.addEventListener('click', () => this.pauseText());
+                console.log('暂停按钮事件绑定完成');
+            }
+            
+            if (this.stopBtn) {
+                this.stopBtn.addEventListener('click', () => this.stopText());
+                console.log('停止按钮事件绑定完成');
+            }
         
-        this.volumeSlider.addEventListener('input', (e) => {
-            this.volumeValue.textContent = Math.round(e.target.value * 100) + '%';
-        });
+            // 语速和音量控制
+            if (this.rateSlider && this.rateValue) {
+                this.rateSlider.addEventListener('input', (e) => {
+                    this.rateValue.textContent = parseFloat(e.target.value).toFixed(1) + 'x';
+                });
+                console.log('语速控制事件绑定完成');
+            }
+            
+            if (this.volumeSlider && this.volumeValue) {
+                this.volumeSlider.addEventListener('input', (e) => {
+                    this.volumeValue.textContent = Math.round(e.target.value * 100) + '%';
+                });
+                console.log('音量控制事件绑定完成');
+            }
         
-        // 录音控制
-        this.recordBtn.addEventListener('click', () => this.startRecording());
-        this.stopRecordBtn.addEventListener('click', () => this.stopRecording());
-        this.playRecordBtn.addEventListener('click', () => this.playRecording());
+            // 录音控制
+            if (this.recordBtn) {
+                this.recordBtn.addEventListener('click', () => this.startRecording());
+                console.log('录音按钮事件绑定完成');
+            } else {
+                console.error('recordBtn元素未找到');
+            }
+            
+            if (this.stopRecordBtn) {
+                this.stopRecordBtn.addEventListener('click', () => this.stopRecording());
+                console.log('停止录音按钮事件绑定完成');
+            }
+            
+            if (this.playRecordBtn) {
+                this.playRecordBtn.addEventListener('click', () => this.playRecording());
+                console.log('回放录音按钮事件绑定完成');
+            }
         
-        // 分析按钮
-        this.analyzeBtn.addEventListener('click', () => this.analyzePronunciation());
+            // 分析按钮
+            if (this.analyzeBtn) {
+                this.analyzeBtn.addEventListener('click', () => this.analyzePronunciation());
+                console.log('分析按钮事件绑定完成');
+            }
+            
+            // 手动输入分析按钮
+            if (this.manualAnalyzeBtn) {
+                this.manualAnalyzeBtn.addEventListener('click', () => {
+                    const manualText = this.manualRecognizedText.value.trim();
+                    if (!manualText) {
+                        alert('请输入您刚才朗读的内容');
+                        return;
+                    }
+                    this.recordedText = manualText;
+                    this.analyzePronunciation();
+                });
+                console.log('手动输入分析按钮事件绑定完成');
+            }
         
-        // 手动输入分析按钮
-        if (this.manualAnalyzeBtn) {
-            this.manualAnalyzeBtn.addEventListener('click', () => {
-                const manualText = this.manualRecognizedText.value.trim();
-                if (!manualText) {
-                    alert('请输入您刚才朗读的内容');
-                    return;
-                }
-                this.recordedText = manualText;
-                this.analyzePronunciation();
-            });
+            // 历史记录
+            if (this.clearHistoryBtn) {
+                this.clearHistoryBtn.addEventListener('click', () => this.clearHistory());
+                console.log('清空历史按钮事件绑定完成');
+            }
+            
+            console.log('所有事件绑定完成');
+        } catch (error) {
+            console.error('事件绑定过程中出错:', error);
+            alert('事件绑定失败，请刷新页面重试。错误：' + error.message);
         }
-        
-        // 历史记录
-        this.clearHistoryBtn.addEventListener('click', () => this.clearHistory());
     }
     
     updateCharCount() {
