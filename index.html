@@ -22,9 +22,6 @@
                 <div class="section-header">
                     <h2>📝 输入英文文本</h2>
                     <div class="text-actions">
-                        <button id="pinTextBtn" class="btn-secondary" title="固定文本显示">
-                            <span class="icon">📌</span> <span id="pinTextLabel">固定</span>
-                        </button>
                         <button id="clearBtn" class="btn-secondary">清空</button>
                         <button id="pasteBtn" class="btn-secondary">粘贴</button>
                         <label for="fileInput" class="btn-secondary" id="fileInputLabel">导入文件</label>
@@ -41,16 +38,6 @@
                 </div>
             </section>
             
-            <!-- 固定文本显示区域（移动端） -->
-            <div id="pinnedTextDisplay" class="pinned-text-display" style="display: none;">
-                <div class="pinned-text-header">
-                    <span>📝 当前文本</span>
-                    <button id="unpinTextBtn" class="btn-secondary" style="padding: 4px 8px; font-size: 12px;">
-                        <span class="icon">✕</span> 取消固定
-                    </button>
-                </div>
-                <div class="pinned-text-content" id="pinnedTextContent"></div>
-            </div>
 
             <!-- 播放控制区域 -->
             <section class="control-section">
@@ -85,6 +72,13 @@
             <section class="record-section">
                 <div class="section-header">
                     <h2>🎤 跟读录音</h2>
+                    <button id="showTextBtn" class="btn-secondary">
+                        <span class="icon">👁️</span> <span id="showTextLabel">显示文本</span>
+                    </button>
+                </div>
+                <!-- 录音时文本显示区域 -->
+                <div id="recordingTextDisplay" class="recording-text-display" style="display: none;">
+                    <div class="recording-text-content" id="recordingTextContent"></div>
                 </div>
                 <div class="record-controls">
                     <button id="recordBtn" class="btn-record">
