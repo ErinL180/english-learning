@@ -103,61 +103,43 @@ section:hover {
     border-color: var(--primary-color);
 }
 
-/* 固定文本显示区域（移动端） */
-.pinned-text-display {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    background: white;
-    border-bottom: 2px solid var(--primary-color);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    z-index: 1000;
-    max-height: 40vh;
-    display: flex;
-    flex-direction: column;
-}
-
-.pinned-text-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 15px;
-    background: var(--primary-color);
-    color: white;
-    font-weight: 600;
-    font-size: 14px;
-}
-
-.pinned-text-content {
-    padding: 12px 15px;
-    max-height: calc(40vh - 50px);
+/* 录音时文本显示区域 */
+.recording-text-display {
+    background: #f8f9fa;
+    border: 2px solid var(--primary-color);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    max-height: 300px;
     overflow-y: auto;
-    font-size: 15px;
-    line-height: 1.6;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.recording-text-content {
+    font-family: 'Courier New', monospace;
+    font-size: 16px;
+    line-height: 1.8;
     color: var(--text-color);
     white-space: pre-wrap;
     word-wrap: break-word;
+    padding: 10px;
+    background: white;
+    border-radius: 4px;
+    min-height: 100px;
 }
 
-/* 文本区域固定状态 */
-.text-input-section.pinned {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: var(--card-bg);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    margin-bottom: 10px;
+/* 显示文本按钮激活状态 */
+#showTextBtn.active {
+    background: var(--success-color);
+    color: white;
+    border-color: var(--success-color);
 }
 
-/* 当文本固定时，调整body padding */
-body.has-pinned-text {
-    padding-top: 0;
+#showTextBtn.active:hover {
+    background: #45a049;
 }
 
-body.has-pinned-text .container {
-    margin-top: 0;
-}
+/* 移除固定按钮相关样式（已不再使用） */
 
 .text-actions {
     display: flex;
@@ -495,16 +477,6 @@ button, .btn-secondary {
     border-color: var(--primary-color);
 }
 
-/* 固定按钮激活状态 */
-#pinTextBtn.active {
-    background: var(--success-color);
-    color: white;
-    border-color: var(--success-color);
-}
-
-#pinTextBtn.active:hover {
-    background: #45a049;
-}
 
 .history-panel {
     display: none;
@@ -711,29 +683,18 @@ footer {
         padding: 12px;
     }
     
-    /* 移动端固定文本显示 */
-    .pinned-text-display {
-        max-height: 35vh;
+    /* 移动端录音时文本显示 */
+    .recording-text-display {
+        max-height: 250px;
+        padding: 12px;
+        margin-bottom: 12px;
     }
     
-    .pinned-text-content {
-        font-size: 14px;
-        padding: 10px 12px;
-        max-height: calc(35vh - 45px);
-    }
-    
-    .pinned-text-header {
-        padding: 8px 12px;
-        font-size: 13px;
-    }
-    
-    /* 文本区域固定状态（移动端） */
-    .text-input-section.pinned {
-        position: sticky;
-        top: 0;
-        z-index: 100;
-        background: var(--card-bg);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    .recording-text-content {
+        font-size: 16px; /* 和输入框一样大 */
+        line-height: 1.8;
+        padding: 12px;
+        min-height: 80px;
     }
     
     .play-controls,
