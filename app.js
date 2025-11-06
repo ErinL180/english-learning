@@ -517,22 +517,54 @@ class EnglishLearningApp {
             
             // 显示文本按钮（录音区域）
             if (this.showTextBtn) {
+                // 先移除可能存在的旧事件监听器
+                const newShowTextBtn = this.showTextBtn.cloneNode(true);
+                this.showTextBtn.parentNode.replaceChild(newShowTextBtn, this.showTextBtn);
+                this.showTextBtn = newShowTextBtn;
+                this.showTextLabel = document.getElementById('showTextLabel');
+                
                 const showTextHandler = (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('显示文本按钮被点击');
+                    console.log('显示文本按钮被点击，事件类型:', e.type);
+                    console.log('当前this:', this);
+                    console.log('isTextShown:', this.isTextShown);
                     try {
                         this.toggleRecordingText();
                     } catch (error) {
                         console.error('切换文本显示时出错:', error);
+                        console.error('错误堆栈:', error.stack);
                         alert('切换文本显示失败：' + error.message);
                     }
                 };
-                this.showTextBtn.addEventListener('click', showTextHandler);
-                this.showTextBtn.addEventListener('touchend', showTextHandler);
-                console.log('显示文本按钮事件绑定完成，按钮元素:', this.showTextBtn);
+                
+                // 绑定多个事件类型，确保兼容性
+                this.showTextBtn.addEventListener('click', showTextHandler, { passive: false });
+                this.showTextBtn.addEventListener('touchend', showTextHandler, { passive: false });
+                this.showTextBtn.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                }, { passive: false });
+                
+                // 直接测试按钮是否可点击
+                console.log('显示文本按钮事件绑定完成');
+                console.log('按钮元素:', this.showTextBtn);
+                console.log('按钮ID:', this.showTextBtn.id);
+                console.log('按钮类名:', this.showTextBtn.className);
+                console.log('按钮样式:', window.getComputedStyle(this.showTextBtn).display);
+                console.log('按钮pointer-events:', window.getComputedStyle(this.showTextBtn).pointerEvents);
+                
+                // 测试点击
+                this.showTextBtn.onclick = function(e) {
+                    console.log('onclick事件触发');
+                    if (app && app.toggleRecordingText) {
+                        app.toggleRecordingText();
+                    }
+                };
             } else {
                 console.error('showTextBtn元素未找到！');
+                console.error('尝试重新查找...');
+                const retryBtn = document.getElementById('showTextBtn');
+                console.error('重新查找结果:', retryBtn);
             }
             
             // 文本输入时更新显示
@@ -1452,23 +1484,48 @@ class EnglishLearningApp {
         
         this.isTextShown = true;
         
-        // 更新按钮状态
-        if (this.showTextBtn) {
-            this.showTextBtn.classList.add('active');
-            if (this.showTextLabel) {
-                this.showTextLabel.textContent = '隐藏文本';
+        // 更新按钮状态（重新获取元素，确保是最新的）
+        const showTextBtn = document.getElementById('showTextBtn');
+        const showTextLabel = document.getElementById('showTextLabel');
+        
+        if (showTextBtn) {
+            showTextBtn.classList.add('active');
+            if (showTextLabel) {
+                showTextLabel.textContent = '隐藏文本';
             }
             console.log('按钮状态已更新为激活');
         } else {
             console.error('showTextBtn未找到！');
+            // 尝试重新获取
+            this.showTextBtn = document.getElementById('showTextBtn');
+            this.showTextLabel = document.getElementById('showTextLabel');
+            if (this.showTextBtn) {
+                this.showTextBtn.classList.add('active');
+                if (this.showTextLabel) {
+                    this.showTextLabel.textContent = '隐藏文本';
+                }
+            }
         }
         
-        // 显示文本区域
-        if (this.recordingTextDisplay) {
-            this.recordingTextDisplay.style.display = 'block';
+        // 显示文本区域（重新获取元素，确保是最新的）
+        const recordingTextDisplay = document.getElementById('recordingTextDisplay');
+        if (recordingTextDisplay) {
+            recordingTextDisplay.style.display = 'block';
+            // 强制显示
+            recordingTextDisplay.style.visibility = 'visible';
+            recordingTextDisplay.style.opacity = '1';
             console.log('文本显示区域已显示');
+            console.log('display:', window.getComputedStyle(recordingTextDisplay).display);
+            console.log('visibility:', window.getComputedStyle(recordingTextDisplay).visibility);
         } else {
             console.error('recordingTextDisplay未找到！');
+            // 尝试重新获取
+            this.recordingTextDisplay = document.getElementById('recordingTextDisplay');
+            if (this.recordingTextDisplay) {
+                this.recordingTextDisplay.style.display = 'block';
+                this.recordingTextDisplay.style.visibility = 'visible';
+                this.recordingTextDisplay.style.opacity = '1';
+            }
         }
         
         // 更新文本内容
@@ -1498,23 +1555,42 @@ class EnglishLearningApp {
     
     updateRecordingText() {
         console.log('updateRecordingText被调用');
-        console.log('recordingTextContent:', this.recordingTextContent);
-        console.log('textInput:', this.textInput);
         
-        if (this.recordingTextContent && this.textInput) {
-            const text = this.textInput.value.trim();
+        // 重新获取元素，确保是最新的
+        const recordingTextContent = document.getElementById('recordingTextContent');
+        const textInput = document.getElementById('textInput');
+        
+        console.log('recordingTextContent:', recordingTextContent);
+        console.log('textInput:', textInput);
+        
+        if (recordingTextContent && textInput) {
+            const text = textInput.value.trim();
             if (text) {
                 // 显示完整文本，不截断
-                this.recordingTextContent.textContent = text;
+                recordingTextContent.textContent = text;
+                // 也更新内部引用
+                this.recordingTextContent = recordingTextContent;
                 console.log('文本内容已更新，长度:', text.length);
+                console.log('文本内容:', text.substring(0, 50) + '...');
             } else {
-                this.recordingTextContent.textContent = '暂无文本';
+                recordingTextContent.textContent = '暂无文本';
                 console.log('文本为空，显示"暂无文本"');
             }
         } else {
             console.error('recordingTextContent或textInput未找到！');
-            console.error('recordingTextContent:', this.recordingTextContent);
-            console.error('textInput:', this.textInput);
+            console.error('recordingTextContent:', recordingTextContent);
+            console.error('textInput:', textInput);
+            // 尝试重新获取
+            this.recordingTextContent = document.getElementById('recordingTextContent');
+            this.textInput = document.getElementById('textInput');
+            if (this.recordingTextContent && this.textInput) {
+                const text = this.textInput.value.trim();
+                if (text) {
+                    this.recordingTextContent.textContent = text;
+                } else {
+                    this.recordingTextContent.textContent = '暂无文本';
+                }
+            }
         }
     }
     
@@ -1762,7 +1838,54 @@ class EnglishLearningApp {
 
 // 初始化应用
 let app;
-window.addEventListener('DOMContentLoaded', () => {
+
+// 确保DOM完全加载后再初始化
+function initApp() {
+    // 检查关键元素是否存在
+    const showTextBtn = document.getElementById('showTextBtn');
+    const recordingTextDisplay = document.getElementById('recordingTextDisplay');
+    const recordingTextContent = document.getElementById('recordingTextContent');
+    
+    console.log('初始化检查:');
+    console.log('showTextBtn:', showTextBtn);
+    console.log('recordingTextDisplay:', recordingTextDisplay);
+    console.log('recordingTextContent:', recordingTextContent);
+    
+    if (!showTextBtn) {
+        console.error('showTextBtn元素未找到，延迟重试...');
+        setTimeout(initApp, 100);
+        return;
+    }
+    
+    if (!recordingTextDisplay) {
+        console.error('recordingTextDisplay元素未找到，延迟重试...');
+        setTimeout(initApp, 100);
+        return;
+    }
+    
+    if (!recordingTextContent) {
+        console.error('recordingTextContent元素未找到，延迟重试...');
+        setTimeout(initApp, 100);
+        return;
+    }
+    
+    console.log('所有关键元素已找到，开始初始化应用');
     app = new EnglishLearningApp();
+}
+
+// 多种方式确保初始化
+if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', initApp);
+} else {
+    // DOM已经加载完成
+    initApp();
+}
+
+// 备用初始化（防止某些情况下DOMContentLoaded未触发）
+window.addEventListener('load', () => {
+    if (!app) {
+        console.warn('DOMContentLoaded未触发，使用load事件初始化');
+        initApp();
+    }
 });
 
