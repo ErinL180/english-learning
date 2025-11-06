@@ -129,6 +129,14 @@ section:hover {
 }
 
 /* 显示文本按钮激活状态 */
+#showTextBtn {
+    position: relative;
+    z-index: 10;
+    pointer-events: auto !important;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(74, 144, 226, 0.3);
+}
+
 #showTextBtn.active {
     background: var(--success-color);
     color: white;
@@ -137,6 +145,10 @@ section:hover {
 
 #showTextBtn.active:hover {
     background: #45a049;
+}
+
+#showTextBtn:active {
+    transform: scale(0.98);
 }
 
 /* 移除固定按钮相关样式（已不再使用） */
