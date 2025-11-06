@@ -56,6 +56,7 @@ class EnglishLearningApp {
         this.analyser = null;
         this.microphone = null;
         this.dataArray = null;
+        this.currentAudio = null; // 当前播放的音频对象
         
         // 初始化
         this.init();
@@ -496,9 +497,63 @@ class EnglishLearningApp {
     }
     
     playRecording() {
-        if (this.recordedAudio) {
+        if (!this.recordedAudio) {
+            alert('没有录音可以播放');
+            return;
+        }
+        
+        try {
+            // 创建新的Audio对象
             const audio = new Audio(this.recordedAudio);
-            audio.play();
+            
+            // 添加错误处理
+            audio.onerror = (e) => {
+                console.error('音频播放错误:', e);
+                alert('播放失败，请重试');
+            };
+            
+            // 添加播放事件
+            audio.onplay = () => {
+                this.playRecordBtn.disabled = true;
+                this.playRecordBtn.innerHTML = '<span class="icon">⏸️</span> 播放中...';
+            };
+            
+            // 添加结束事件
+            audio.onended = () => {
+                this.playRecordBtn.disabled = false;
+                this.playRecordBtn.innerHTML = '<span class="icon">▶️</span> 回放录音';
+            };
+            
+            // 添加暂停事件
+            audio.onpause = () => {
+                this.playRecordBtn.disabled = false;
+                this.playRecordBtn.innerHTML = '<span class="icon">▶️</span> 回放录音';
+            };
+            
+            // 播放音频（移动端需要用户交互）
+            const playPromise = audio.play();
+            
+            // 处理播放Promise（移动端可能返回Promise）
+            if (playPromise !== undefined) {
+                playPromise
+                    .then(() => {
+                        // 播放成功
+                        console.log('音频播放成功');
+                    })
+                    .catch((error) => {
+                        console.error('音频播放失败:', error);
+                        alert('无法播放录音，请检查浏览器权限或重试');
+                        this.playRecordBtn.disabled = false;
+                        this.playRecordBtn.innerHTML = '<span class="icon">▶️</span> 回放录音';
+                    });
+            }
+            
+            // 保存audio引用以便后续控制
+            this.currentAudio = audio;
+            
+        } catch (error) {
+            console.error('播放录音时出错:', error);
+            alert('播放失败：' + error.message);
         }
     }
     
@@ -788,4 +843,3 @@ let app;
 window.addEventListener('DOMContentLoaded', () => {
     app = new EnglishLearningApp();
 });
-
