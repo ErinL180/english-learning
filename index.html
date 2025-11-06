@@ -126,14 +126,29 @@
                 </div>
             </section>
 
-            <!-- 录音历史 -->
+            <!-- 练习历史 -->
             <section class="history-section">
                 <div class="section-header">
                     <h2>📚 练习历史</h2>
+                    <div class="history-tabs">
+                        <button id="textHistoryTab" class="tab-btn active">文本记录</button>
+                        <button id="audioHistoryTab" class="tab-btn">录音历史</button>
+                    </div>
                     <button id="clearHistoryBtn" class="btn-secondary">清空历史</button>
                 </div>
-                <div class="history-list" id="historyList">
-                    <p class="placeholder">暂无练习记录</p>
+                
+                <!-- 文本历史记录 -->
+                <div id="textHistoryPanel" class="history-panel active">
+                    <div class="history-list" id="historyList">
+                        <p class="placeholder">暂无练习记录</p>
+                    </div>
+                </div>
+                
+                <!-- 录音历史记录 -->
+                <div id="audioHistoryPanel" class="history-panel">
+                    <div class="audio-history-list" id="audioHistoryList">
+                        <p class="placeholder">暂无录音记录</p>
+                    </div>
                 </div>
             </section>
         </main>
